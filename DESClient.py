@@ -379,17 +379,17 @@ def rsaencrypt(plaintext, public_key):
     e = int(e)
     n = int(n)
     ciphertext = [pow(ord(char), e, n) for char in plaintext]
-    print(ciphertext)
+    # print(ciphertext)
     return ciphertext
 
 # Function to decrypt a message
 def rsadecrypt(ciphertext, private_key):
     n, d = private_key
     ciphertext = [int(x) for x in eval(ciphertext)]
-    print(type(ciphertext))
-    print(type(ciphertext[0]))
-    for char in ciphertext:
-        print("char : " + str(char))
+    # print(type(ciphertext))
+    # print(type(ciphertext[0]))
+    # for char in ciphertext:
+    #     print("char : " + str(char))
     # Now decrypt each integer in the ciphertext and convert to the corresponding character
     plaintext = ''.join([chr(pow(char, d, n)) for char in ciphertext])
     return plaintext
@@ -416,8 +416,8 @@ def client_program():
     while message.lower().strip() != 'bye':
         if message == "get public key b":
             public_key_b = fetch_public_key("B", public_key_pka)
-            print(public_key_b)
-        elif message == "first step handshake":
+            #print(public_key_b)
+        elif message == "handshake":
             data = "A,5"
             data = rsaencrypt(data, public_key_b)
             data = str(data)
@@ -425,10 +425,10 @@ def client_program():
 
             #step 2 handshake
             data = client_socket.recv(1024).decode()
-            print(data)
+            #print(data)
             content = rsadecrypt(data, private_key)
             content = content.split(",")
-            print("content[0] : " + str(content[0]))
+            #print("content[0] : " + str(content[0]))
             if content[0] == "5":
                 n2 = content[1]
                 data = n2
