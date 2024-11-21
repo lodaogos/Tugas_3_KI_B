@@ -402,6 +402,7 @@ private_key = (3233, 2753)
 public_key_b = None
 public_key_pka = "pbkeypka"
 n2 = None
+DES_key = "17701300"
 
 def client_program():
     host = socket.gethostname()  # as both code is running on same pc
@@ -412,8 +413,7 @@ def client_program():
 
     message = input(" -> ")  # take input
     # message = encrypt(message, key)
-    signal = message
-    while signal.lower().strip() != 'bye':
+    while message.lower().strip() != 'bye':
         if message == "get public key b":
             public_key_b = fetch_public_key("B", public_key_pka)
             print(public_key_b)
@@ -438,16 +438,26 @@ def client_program():
                 data = client_socket.recv(1024).decode()
                 if data == "connection established":
                     print("connection established")
-        message = input(" -> ")
-        # client_socket.send(message.encode())  # send message
-        # data = client_socket.recv(1024).decode()  # receive response
-        # print("Received from server before decrypted: " + data)
-        # data = decrypt(data, key)
-        # print('After decrypted: ' + data)  # show in terminal
+        # 3rd step DES
+        elif message == "send des key":
+            data = DES_key
+            data = rsaencrypt(data, public_key_b)
+            data = str(data)
+            client_socket.send(data.encode())
 
-        # message = input(" -> ")  # again take input
-        # signal = message
-        # message = encrypt(message, key)
+            print("DES_Key has been send")
+            print("From now on chat using DES")
+            message = input(" -> ")
+            while message.lower().strip() != 'bye':
+                data = encrypt(message, DES_key)
+                client_socket.send(data.encode())
+                data = client_socket.recv(1024).decode()
+                print("Received: " + str(data))
+                data = decrypt(data, DES_key)
+                print("After decrypted: " + str(data))
+                message = input(" -> ")
+            break
+        message = input(" -> ")
         
     client_socket.close()  # close the connection
 
