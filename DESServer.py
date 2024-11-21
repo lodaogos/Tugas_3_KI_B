@@ -362,7 +362,6 @@ def fetch_public_key(device_name, pka_private_key):
         if encrypted_public_key:
             decrypted_public_key_str = decrypt(encrypted_public_key, pka_private_key)
             data = decrypted_public_key_str.split(",")
-            print(data)
             return data
         else:
             print("No encrypted public key found in the response.")
@@ -380,17 +379,12 @@ def rsaencrypt(plaintext, public_key):
     e = int(e)
     n = int(n)
     ciphertext = [pow(ord(char), e, n) for char in plaintext]
-    print(ciphertext)
     return ciphertext
 
 # Function to decrypt a message
 def rsadecrypt(ciphertext, private_key):
     n, d = private_key
     ciphertext = [int(x) for x in eval(ciphertext)]
-    print(type(ciphertext))
-    print(type(ciphertext[0]))
-    for char in ciphertext:
-        print("char : " + str(char))
     # Now decrypt each integer in the ciphertext and convert to the corresponding character
     plaintext = ''.join([chr(pow(char, d, n)) for char in ciphertext])
     return plaintext
@@ -419,13 +413,9 @@ def server_program():
     print("Connection from: " + str(address))
     while True:
         data = conn.recv(1024).decode()
-        print(type(data))
-        print(type(data[0]))
         data_decrypt_b = rsadecrypt(data, private_key)
         if data_decrypt_b:
-            print("data : " + data_decrypt_b)
             content = data_decrypt_b.split(",")
-            print("content:" + str(content[0]))
             if content[0] == "A":
                 public_key_a = fetch_public_key("A", public_key_pka)
                 n1 = content[1]
@@ -436,7 +426,6 @@ def server_program():
 
                 # step 3 handshake 
                 data = conn.recv(1024).decode()
-                print(data)
                 content = rsadecrypt(data, private_key)
                 if content == "7":
                     data = "connection established"
@@ -459,11 +448,14 @@ def server_program():
                         data = encrypt(data, DES_key)
                         conn.send(data.encode())
                 else:
-                    print("Not connection")
+                    print("No connection")
+                    conn.close()
             else:
                 print("Not from A")
+                conn.close()
         else:
             print("No Data")
+            conn.close()
         break
 
     conn.close()  # close the connection
