@@ -402,6 +402,7 @@ private_key = (391, 145)
 public_key_a = None
 public_key_pka = "pbkeypka"
 n1 = None
+DES_key = None
 
 def server_program():
     # get the hostname
@@ -441,25 +442,29 @@ def server_program():
                     data = "connection established"
                     print("connection established")
                     conn.send(data.encode())
+
+                    # step 4 get DES_key
+                    data = conn.recv(1024).decode()
+                    DES_key = rsadecrypt(data, private_key)
+                    print(DES_key)
+                    print("From now on chat using DES")
+                    while True:
+                        data = conn.recv(1024).decode()
+                        if not data:
+                            break
+                        print("Received: " + str(data))
+                        data = decrypt(data, DES_key)
+                        print("After decrypted: " + str(data))
+                        data = input(' -> ')
+                        data = encrypt(data, DES_key)
+                        conn.send(data.encode())
                 else:
                     print("Not connection")
             else:
                 print("Not from A")
         else:
             print("No Data")
-        data = input(' -> ')
-        # # receive data stream. it won't accept data packet greater than 1024 bytes
-        # data = conn.recv(1024).decode()
-        # if not data:
-        #     # if data is not received break
-        #     break
-        # print("Received from user before decrypted: " + str(data))
-        # data = decrypt(data, key)
-
-        # print("After decrypted: " + str(data))
-        # data = input(' -> ')
-        # data = encrypt(data, key)
-        # conn.send(data.encode())  # send data to the client
+        break
 
     conn.close()  # close the connection
 
